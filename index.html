@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SALVATORE — سالفاتور</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;700;900&family=Noto+Naskh+Arabic:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080808;
+      --white: #f0ece4;
+      --gold: #c9a84c;
+      --gold-dim: #8a6e2f;
+      --silver: #b8b8b8;
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: var(--grain);
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* rhinestone cursor trail */
+    .trail {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--white);
+      pointer-events: none;
+      z-index: 9998;
+      transition: opacity 0.6s ease;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+    }
+
+    /* corner marks */
+    .corner {
+      position: fixed;
+      width: 28px;
+      height: 28px;
+      opacity: 0.35;
+    }
+    .corner--tl { top: 24px; left: 24px; border-top: 1px solid var(--white); border-left: 1px solid var(--white); }
+    .corner--tr { top: 24px; right: 24px; border-top: 1px solid var(--white); border-right: 1px solid var(--white); }
+    .corner--bl { bottom: 24px; left: 24px; border-bottom: 1px solid var(--white); border-left: 1px solid var(--white); }
+    .corner--br { bottom: 24px; right: 24px; border-bottom: 1px solid var(--white); border-right: 1px solid var(--white); }
+
+    /* ── RHINESTONE FIELD ── */
+    .rhinestones {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .rs {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff, #aaaaaa 60%, #444 100%);
+      box-shadow: 0 0 3px rgba(255,255,255,0.4), inset 0 1px 1px rgba(255,255,255,0.6);
+      animation: rstwinkle var(--d) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    @keyframes rstwinkle {
+      0%, 100% { opacity: var(--min-op); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 720px;
+      width: 100%;
+      animation: fadeUp 1.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* tag line */
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      animation: fadeUp 1.2s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* big latin title */
+    .title-latin {
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      font-size: clamp(56px, 14vw, 130px);
+      line-height: 0.88;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      animation: fadeUp 1.2s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* arabic title */
+    .title-arabic {
+      font-family: 'Noto Naskh Arabic', serif;
+      font-weight: 700;
+      font-size: clamp(28px, 7vw, 64px);
+      color: var(--gold);
+      direction: rtl;
+      margin-top: 8px;
+      letter-spacing: 0.04em;
+      animation: fadeUp 1.2s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 36px auto;
+      width: 260px;
+      animation: fadeUp 1.2s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim));
+    }
+    .divider::after { background: linear-gradient(to left, transparent, var(--gold-dim)); }
+    .divider-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+    }
+
+    /* tagline */
+    .tagline {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--silver);
+      line-height: 2;
+      animation: fadeUp 1.2s 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* collection badge */
+    .badge {
+      display: inline-block;
+      margin-top: 28px;
+      border: 1px solid var(--gold-dim);
+      padding: 6px 20px;
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      animation: fadeUp 1.2s 0.55s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* form */
+    .form-wrap {
+      margin-top: 48px;
+      animation: fadeUp 1.2s 0.65s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .form-label {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--silver);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      border: 1px solid rgba(201,168,76,0.35);
+      transition: border-color 0.3s;
+    }
+    .form-row:focus-within { border-color: var(--gold); }
+
+    .form-input {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: none;
+      outline: none;
+      padding: 16px 20px;
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+    .form-input::placeholder { color: rgba(176,176,176,0.4); }
+
+    .form-btn {
+      background: var(--gold);
+      border: none;
+      padding: 16px 28px;
+      color: var(--black);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .form-btn:hover { background: #e0b95a; }
+    .form-btn:active { transform: scale(0.97); }
+
+    .form-note {
+      margin-top: 14px;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: rgba(176,176,176,0.4);
+      text-transform: uppercase;
+    }
+
+    /* success state */
+    .success-msg {
+      display: none;
+      margin-top: 24px;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* counter */
+    .counter-wrap {
+      margin-top: 56px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      animation: fadeUp 1.2s 0.75s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .counter-item { text-align: center; }
+    .counter-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      color: var(--white);
+      line-height: 1;
+      letter-spacing: 0.05em;
+    }
+    .counter-label {
+      font-size: 8px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--silver);
+      margin-top: 4px;
+    }
+
+    /* footer */
+    .footer {
+      position: fixed;
+      bottom: 28px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 8px;
+      letter-spacing: 0.3em;
+      color: rgba(176,176,176,0.25);
+      text-transform: uppercase;
+      z-index: 10;
+    }
+
+    /* mobile */
+    @media (max-width: 480px) {
+      .form-row { flex-direction: column; }
+      .form-btn { padding: 14px; }
+      .counter-wrap { gap: 24px; }
+      .counter-num { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Corner marks -->
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+
+  <!-- Rhinestone field -->
+  <div class="rhinestones" id="rhinestones"></div>
+
+  <!-- Main -->
+  <main class="page">
+    <div class="content">
+
+      <p class="eyebrow">Arabic Collection — Season 01</p>
+
+      <h1 class="title-latin">SALVATORE</h1>
+      <h2 class="title-arabic">سالفاتور</h2>
+
+      <div class="divider"><div class="divider-dot"></div></div>
+
+      <p class="tagline">
+        High-material streetwear.<br>
+        Forged for those who move differently.
+      </p>
+
+      <span class="badge">Coming Soon — Drop 01</span>
+
+      <!-- Waitlist form -->
+      <div class="form-wrap">
+        <label class="form-label">Be first. Join the waitlist.</label>
+        <div class="form-row">
+          <input
+            class="form-input"
+            type="email"
+            id="emailInput"
+            placeholder="your@email.com"
+            autocomplete="email"
+          />
+          <button class="form-btn" onclick="submitWaitlist()">Join</button>
+        </div>
+        <p class="form-note">No spam. Drop access only.</p>
+        <p class="success-msg" id="successMsg">✦ &nbsp;You're on the list. Stay ready.</p>
+      </div>
+
+      <!-- Counter -->
+      <div class="counter-wrap">
+        <div class="counter-item">
+          <div class="counter-num" id="cnt-pieces">50</div>
+          <div class="counter-label">Pieces — Drop 01</div>
+        </div>
+        <div class="counter-item">
+          <div class="counter-num" id="cnt-styles">4</div>
+          <div class="counter-label">Styles</div>
+        </div>
+        <div class="counter-item">
+          <div class="counter-num" id="cnt-members">—</div>
+          <div class="counter-label">On Waitlist</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    SALVATORE © 2026 &nbsp;·&nbsp; سالفاتور &nbsp;·&nbsp; All rights reserved
+  </footer>
+
+  <script>
+    // ── RHINESTONE FIELD ──────────────────────────────────
+    const field = document.getElementById('rhinestones');
+    const count = window.innerWidth < 480 ? 55 : 110;
+    for (let i = 0; i < count; i++) {
+      const rs = document.createElement('div');
+      rs.className = 'rs';
+      const size = Math.random() * 3.5 + 1.5;
+      const minOp = (Math.random() * 0.15 + 0.06).toFixed(2);
+      rs.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}%;
+        top:${Math.random()*100}%;
+        --d:${(Math.random()*4+2).toFixed(1)}s;
+        --delay:${(Math.random()*5).toFixed(1)}s;
+        --min-op:${minOp};
+      `;
+      field.appendChild(rs);
+    }
+
+    // ── CURSOR TRAIL ──────────────────────────────────────
+    const trails = [];
+    const TRAIL_LEN = 14;
+    for (let i = 0; i < TRAIL_LEN; i++) {
+      const t = document.createElement('div');
+      t.className = 'trail';
+      t.style.opacity = 0;
+      document.body.appendChild(t);
+      trails.push({ el: t, x: 0, y: 0 });
+    }
+    let mx = 0, my = 0;
+    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animTrail() {
+      let lx = mx, ly = my;
+      trails.forEach((t, i) => {
+        const el = t.el;
+        el.style.left = lx - 2 + 'px';
+        el.style.top  = ly - 2 + 'px';
+        const op = ((TRAIL_LEN - i) / TRAIL_LEN * 0.7).toFixed(2);
+        el.style.opacity = op;
+        const nx = lx + (t.x - lx) * 0.35;
+        const ny = ly + (t.y - ly) * 0.35;
+        t.x = lx; t.y = ly;
+        lx = nx; ly = ny;
+      });
+      requestAnimationFrame(animTrail);
+    })();
+
+    // ── WAITLIST ──────────────────────────────────────────
+    let waitlistCount = parseInt(localStorage.getItem('sal_count') || '0');
+
+    function updateCounter() {
+      const el = document.getElementById('cnt-members');
+      el.textContent = waitlistCount > 0 ? waitlistCount : '—';
+    }
+    updateCounter();
+
+    function submitWaitlist() {
+      const input = document.getElementById('emailInput');
+      const email = input.value.trim();
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!re.test(email)) {
+        input.style.outline = '1px solid #c0392b';
+        setTimeout(() => input.style.outline = '', 1000);
+        return;
+      }
+
+      // Save locally and increment counter
+      const emails = JSON.parse(localStorage.getItem('sal_emails') || '[]');
+      if (!emails.includes(email)) {
+        emails.push(email);
+        localStorage.setItem('sal_emails', JSON.stringify(emails));
+        waitlistCount++;
+        localStorage.setItem('sal_count', waitlistCount);
+        updateCounter();
+      }
+
+      input.value = '';
+      document.querySelector('.form-row').style.display = 'none';
+      document.querySelector('.form-note').style.display = 'none';
+      const msg = document.getElementById('successMsg');
+      msg.style.display = 'block';
+    }
+
+    // Enter key support
+    document.getElementById('emailInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitWaitlist();
+    });
+
+    // ── ANIMATED COUNTER ──────────────────────────────────
+    function animCount(el, target, duration) {
+      let start = 0;
+      const step = target / (duration / 16);
+      const id = setInterval(() => {
+        start += step;
+        if (start >= target) { start = target; clearInterval(id); }
+        el.textContent = Math.floor(start);
+      }, 16);
+    }
+    setTimeout(() => {
+      animCount(document.getElementById('cnt-pieces'), 50, 1200);
+      animCount(document.getElementById('cnt-styles'), 4, 800);
+    }, 900);
+  </script>
+</body>
+</html>
